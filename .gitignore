@@ -1,2 +1,5 @@
 #Ignore local data file
 data/
+
+#Ignore to do
+todo.md
