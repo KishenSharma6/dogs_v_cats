@@ -1,0 +1,1 @@
+Engineering binary classifier using convnet designed to differentiate dog and cat images. Purpose of this project is to increase familiarity with the PyTorch API.
