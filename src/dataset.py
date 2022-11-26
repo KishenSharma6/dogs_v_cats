@@ -1,5 +1,5 @@
 import torch
-import cv2 #used to read images
+import PIL #used to read images
 
 import numpy as np
 import os
@@ -16,17 +16,15 @@ class ImageDataset:
     
     def __getitem__(self, idx):
         target = self.targets[idx]
-        image = cv2.imread(self.image_paths + str(idx) + '.jpg')
-        #openCV loads image channels as BGR, we want to convert that to RGB 
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = PIL.Image.open(self.image_paths + str(idx) + '.jpg')
 
         #check for augmentations, apply changes to image if true
         if self.augmentations is not None:
-            augmented = self.augmentations(image = image)
-            image = augmented["image"]
+            augmented = self.augmentations(image)
+            image = augmented
         
         #convert image tensors to be in channel first format
-        image = np.transpose(image, (2,0,1)).astype(np.float32)
+        image = np.transpose(image, (2,0,1)).astype(np.int32)
 
         return {
             "image": torch.tensor(image),
