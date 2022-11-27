@@ -24,7 +24,7 @@ class ImageDataset:
             image = augmented
         
         #convert image tensors to be in channel first format
-        image = np.transpose(image, (2,0,1)).astype(np.int32)
+        image = np.transpose(image, (2,0,1)).astype(np.float64)
 
         return {
             "image": torch.tensor(image),
