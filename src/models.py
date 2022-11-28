@@ -28,7 +28,7 @@ class ConvNet(nn.Module):
                                   stride=2)
         self.fc1 = nn.Linear(109520, 256)
         self.fc2 = nn.Linear(256, 512)
-        self.fc3 = nn.Linear(512, 2)
+        self.fc3 = nn.Linear(512, 1) #Binary classification/ we just want 1 output
 
     
     def forward(self, x):
