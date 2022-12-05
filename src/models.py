@@ -67,7 +67,7 @@ class BaseConvNet(nn.Module):
         self.pool2 = nn.MaxPool2d(kernel_size=3,
 
                                   stride=1)
-        self.fc1 = nn.Linear(237620, 256)
+        self.fc1 = nn.Linear(56180, 256)
         self.fc2 = nn.Linear(256, 512)
         self.fc3 = nn.Linear(512, 1) #Binary classification/ we just want 1 output
 
@@ -76,63 +76,6 @@ class BaseConvNet(nn.Module):
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-
-        return x
-
-class ConvNet1_0(nn.Module):
-    def __init__(self):
-        super().__init__()
-
-        self.conv1 = nn.Conv2d(in_channels= 3,
-                               out_channels= 32,
-                               kernel_size= 3,
-                               stride= 1, 
-                               padding= 1)
-
-        self.conv2 = nn.Conv2d(in_channels= 32,
-                               out_channels= 64,
-                               kernel_size= 5,
-                               stride=1, 
-                               padding=2)
-
-        self.pool1 = nn.MaxPool2d(kernel_size=5,
-                                    stride=1)
-
-        self.conv3 = nn.Conv2d(in_channels= 64,
-                               out_channels= 64,
-                               kernel_size=3,
-                               stride=1, 
-                               padding=1)
-
-        self.conv4 = nn.Conv2d(in_channels= 64,
-                               out_channels= 64,
-                               kernel_size=3,
-                               stride=1, 
-                               padding=1)
-        self.pool2 = nn.MaxPool2d(kernel_size=2,
-                                    stride= 2)
-        self.conv5 = nn.Conv2d(in_channels= 64,
-                               out_channels= 64,
-                               kernel_size=3,
-                               stride=1, 
-                               padding=1)
-
-        self.fc1 = nn.Linear( 49561600 , 512)
-        self.fc2 = nn.Linear(512, 256)
-        self.fc3 = nn.Linear(256, 1)
-
-    
-    def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = self.pool1(F.relu(self.conv2(x)))
-        x = F.relu(self.conv3(x))
-        x = self.pool2(F.relu(self.conv4(x)))
-        x = F.relu(self.conv5(x))
-
-        x = torch.flatten(x)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
