@@ -76,7 +76,7 @@ class BaseConvNet(nn.Module):
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1)
-        x = F.relu(self.fc1(x))
+        x = torch.nn.Dropout(F.relu(self.fc1(x)), p=.5)
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
 
