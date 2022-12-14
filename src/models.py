@@ -3,12 +3,27 @@ import torch.nn as nn
 import torch.nn.functional as F
 torch.manual_seed(0)
 
+
+
 import numpy as np
 
 def accuracy(preds, labels):
     preds = preds > 0.5
     return (labels == preds).sum().item() / labels.size(0)
-def train(model, loader, epochs, criterion, optimizer):
+
+def plot_acc(acc_scores, ax):
+    ax.plot(acc_scores, color = 'orange')
+    ax.set_xlabel("epochs")
+    ax.set_ylabel("accuracy")
+    ax.set_title("Accuracy during Training")
+
+def plot_loss(loss_scores, ax):
+    ax.plot(loss_scores, color = 'blue')
+    ax.set_xlabel("epochs")
+    ax.set_ylabel("Loss")
+    ax.set_title("Loss during Training")
+
+def train(model, train_set, loader, epochs, criterion, optimizer):
     
     #move model to gpu
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -39,45 +54,62 @@ def train(model, loader, epochs, criterion, optimizer):
             correct += accuracy(preds, labels)
 
         epoch_loss[epoch] = (running_loss / i) #i is the num_batches in epoch
-        epoch_acc[epoch] = (correct/len(loader.dataset)) * 100
+        epoch_acc[epoch] = 100 * correct / i
 
-        print("Loss for Epoch %s: %s\nAccuracy: %s" % (str(epoch + 1), str(round(epoch_loss[epoch],3)),str(round(epoch_acc[epoch],3))))
+        print("Loss for Epoch %s: %s\nAccuracy: %s" % (str(epoch + 1), str(round(epoch_loss[epoch],3)),str(epoch_acc[epoch])))
 
     print("Training complete!")
+    return epoch_loss, epoch_acc
 
 class BaseConvNet(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv2d(in_channels= 3,
-                                out_channels= 10, 
+                                out_channels= 32, 
                                 kernel_size= 5,
                                 padding= 2,
                                 stride=1)
 
+        self.batchnorm1 = nn.BatchNorm2d(num_features=32)
         
-        self.pool1 = nn.MaxPool2d(kernel_size=3,
-                                  stride=2)
+        self.pool1 = nn.MaxPool2d(kernel_size=2,
+                                  stride=1)
 
-        self.conv2 = nn.Conv2d(in_channels= 10,
-                                out_channels= 20,
+        self.conv2 = nn.Conv2d(in_channels= 32,
+                                out_channels= 32,
                                 kernel_size=5,
                                 padding=2, 
                                 stride=1)
 
-        self.pool2 = nn.MaxPool2d(kernel_size=3,
+        self.batchnorm2 = nn.BatchNorm2d(num_features=32)
 
+        self.pool2 = nn.MaxPool2d(kernel_size=2,
                                   stride=1)
-        self.fc1 = nn.Linear(56180, 256)
-        self.fc2 = nn.Linear(256, 512)
-        self.fc3 = nn.Linear(512, 1) #Binary classification/ we just want 1 output
+
+        self.conv3 = nn.Conv2d(in_channels= 20,
+                                out_channels= 40, 
+                                kernel_size= 5,
+                                padding= 2,
+                                stride=1)
+
+        self.batchnorm3 = nn.BatchNorm2d(num_features=40)
+        
+        self.pool3 = nn.MaxPool2d(kernel_size=2,
+                                  stride=1)
+
+        self.fc1 = nn.Linear(508032, 512)
+        self.fc2 = nn.Linear(512, 1) #Binary classification/ we just want 1 output
+
+        self.dropout1 = torch.nn.Dropout(p= .5)
+       
 
     
     def forward(self, x):
-        x = self.pool1(F.relu(self.conv1(x)))
-        x = self.pool2(F.relu(self.conv2(x)))
+        x = self.pool1(F.relu(self.batchnorm1(self.conv1(x))))
+        x = self.pool2(F.relu(self.batchnorm2(self.conv2(x))))
+        #x = self.pool2(F.relu(self.batchnorm3(self.conv3(x))))
         x = torch.flatten(x, 1)
-        x = torch.nn.Dropout(F.relu(self.fc1(x)), p=.5)
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = self.dropout1(F.relu(self.fc1(x)))
+        x = self.fc2(x)
 
         return x
